@@ -10,6 +10,8 @@ public class ConnectFour {
 		 * 	
 		 * 	Returns: N/A
 		 */
+		String command;
+		String error;
 		int[][] board = {
 				{1,0,1,0,1,0,1,0,1,0,1,0,1,0,1},
 				{1,0,1,0,1,0,1,0,1,0,1,0,1,0,1},
@@ -20,78 +22,72 @@ public class ConnectFour {
 				{2,2,2,2,2,2,2,2,2,2,2,2,2,2,2}
 		}; // board creation and initialization
 		int winCount = 0; // connections to win
+		Scanner input = new Scanner(System.in); // Retrieve user input
 		while (true) { // loops for player input
-			Scanner input = new Scanner(System.in); // Retrieve user input
+			command = "";
 			System.out.println("Enter Command");
 			System.out.println("q:quit / p: play");
-			String command = input.next();
-			if (command.equalsIgnoreCase("q")) { // quit
-				break;
+			try { // catches players entering weird and random inputs
+				command = input.next();
+				if (command.equalsIgnoreCase("q")) { // quit
+					System.out.println("Thank you for Playing!");
+					System.exit(0);
+				}
+				if (command.equalsIgnoreCase("p")) { // play
+					System.out.println("Playing");
+					System.out.println("Enter Win count (3,4,5)");
+					try {
+						winCount = input.nextInt(); // Retrieve next integer input
+					}
+					catch (Exception e){ // except if user enters in invalid character
+						winCount = 0;
+					}
+					if (winCount > 2 && winCount < 6) { // checks that winCount is in range
+						System.out.println("Continuing");
+						game(board, winCount);
+						break; // ends game
+					}
+					else { // User entered in wrong number
+						System.out.println("Invalid Win Count");
+					}
+						
+				}
+				else { // something has broken with user input
+					System.out.println("Invalid entry");
+				}
 			}
-			if (command.equalsIgnoreCase("p")) { // play
-				System.out.println("Playing");
-				System.out.println("Enter Win count (3,4,5)");
-				try {
-					winCount = input.nextInt(); // Retrieve next integer input
-				}
-				catch (Exception e){ // except if user enters in invalid character
-					winCount = 0;
-				}
-				if (winCount > 2 && winCount < 6) { // checks that winCount is in range
-					System.out.println("Continuing");
-					game(board, winCount);
-					break; // ends game
-				}
-				else { // User entered in wrong number
-					System.out.println("Invalid Win Count");
-				}
-					
-			}
-			else { // something has broken with user input
-				System.out.println("Invalid entry");
+			catch (Exception e) {
+				System.out.println("Error! Please don't do what you just did again!");
 			}
 		}
+		input.close();
 	}
 	
-	public static int vert_Check(int[][] board, int winCount) {
+	public static int vert_Check(int[][] board, int winCount, int team) {
 		/*	This function checks the vertical axis for a player victory
 		 * 	
 		 * 	Return: integer (value between 0-2)
 		 */
 		// Vertical check
-		boolean yWin = true; // team that wins
-		boolean rWin = true;
+		boolean win = true; // team that wins
 		for (int i = 0; i < 7; i++) { // vertical loop
 			for (int j = 0; j < 7; j++) { // horizontal loop
-				if (board[i][column_finder(j)] == 3) { // finds yellow token
-					yWin = true;
+				if (board[i][column_finder(j)] == team) { // finds yellow token
+					win = true;
 					for (int k = 0;k < winCount; k++) { // checks next few token in vertical direction
 						try {
-							if (board[i+k][column_finder(j)] != 3) { // token doesn't = 3, false
-								yWin = false;
+							if (board[i+k][column_finder(j)] != team) { // token doesn't = 3, false
+								win = false;
 							}
 						}
 						catch (Exception e) { // catches out of bounds errors
-							yWin = false;
+							win = false;
 						}
 					}
-					if (yWin) { // return yellow win
+					if (win && team == 3) { // return yellow win
 						return 1;
 					}
-				}
-				if (board[i][column_finder(j)] == 4) { // checks team red
-					rWin = true;
-					for (int k = 0;k < winCount; k++) { // checks next few tokens 
-						try {
-							if (board[i+k][column_finder(j)] != 4) { // if token not red, set Bool to false
-								rWin = false;
-							}
-						}
-						catch (Exception e) { // catch index out of range errors
-							rWin = false;
-						}
-					}
-					if (rWin) { // return red win
+					else if (win && team == 4) {
 						return 2;
 					}
 				}
@@ -100,44 +96,30 @@ public class ConnectFour {
 		return 0; // continue with game
 	}
 	
-	public static int horizontal_Check(int[][] board, int winCount) {
+	public static int horizontal_Check(int[][] board, int winCount, int team) {
 		/*	This function checks the horizontal axis for a player victory
 		 * 
 		 * 	Return: integer (0-2)
 		 */	
-		boolean yWin = true; // team that wins
-		boolean rWin = true;
+		boolean win = true; // team that wins
 		for (int i = 0; i < 7; i++) { // vertical
 			for (int j = 0; j < 7; j++) { // horizontal
-				if (board[i][column_finder(j)] == 3) { // yellow
-					yWin = true;
+				if (board[i][column_finder(j)] == team) { // yellow
+					win = true;
 					for (int k = 0;k < winCount; k++) { // checks next few token horizontally
 						try {
-							if (board[i][column_finder(j+k)] != 3) { // if token not yellow, False
-								yWin = false;
+							if (board[i][column_finder(j+k)] != team) { // if token not yellow, False
+								win = false;
 							}
 						}
 						catch (Exception e) { // On exception, False
-							yWin = false;
+							win = false;
 						}
 					}
-					if (yWin) { // return yellow
+					if (win && team == 3) { // Return yellow
 						return 1;
 					}
-				}
-				if (board[i][column_finder(j)] == 4) { // red
-					rWin = true;
-					for (int k = 0;k < winCount; k++) { // checks next few tokens
-						try {
-							if (board[i][column_finder(j+k)] != 4) { // if not red, false
-								rWin = false;
-							}
-						}
-						catch (Exception e) { // catch exceptions
-							rWin = false;
-						}
-					}
-					if (rWin) { // returns red win
+					else if (win && team == 4) { // Return red
 						return 2;
 					}
 				}
@@ -146,47 +128,31 @@ public class ConnectFour {
 		return 0; // continue with game
 	}
 	
-	public static int diagonal_Check(int[][] board, int winCount, int[] direction) {
+	public static int diagonal_Check(int[][] board, int winCount, int[] direction,int team) {
 		/*	This function checks the diagonal axis for a player victory
 		 * 
 		 * 	Return: integer (0-2)
 		 */	
-		boolean yWin = true; // team
-		boolean rWin = true;
+		boolean win = true; // team
 		for (int i = 0; i < 7; i++) { // vertical
 			for (int j = 0; j < 7; j++) { // horizontal
-				if (board[i][column_finder(j)] == 3) { // Y
-					yWin = true;
+				if (board[i][column_finder(j)] == team) { // Y
+					win = true;
 					for (int k = 0;k < winCount; k++) { // check next token
 						try {
 							// if not yellow, false
-							if (board[i + (direction[0]*k)][column_finder(j + (direction[1]*k))] != 3) {
-								yWin = false;
+							if (board[i + (direction[0]*k)][column_finder(j + (direction[1]*k))] != team) {
+								win = false;
 							}
 						}
 						catch (Exception e) { // catch exceptions
-							yWin = false;
+							win = false;
 						}
 					}
-					if (yWin) { // yellow win
+					if (win && team == 3) { // yellow win
 						return 1;
 					}
-				}
-				if (board[i][column_finder(j)] == 4) { // R
-					rWin = true;
-					for (int k = 0;k < winCount; k++) { // next tokens
-						try {
-							// token not red, false
-							if (board[i + (direction[0]*k)][column_finder(j + (direction[1]*k))] != 4) {
-
-								rWin = false;
-							}
-						}
-						catch (Exception e) { // Exceptions
-							rWin = false;
-						}
-					}
-					if (rWin) {// return red win
+					else if (win && team == 4) { // Red win
 						return 2;
 					}
 				}
@@ -203,7 +169,6 @@ public class ConnectFour {
 		 * 	has been a draw.
 		 * 
 		 * 	Return:	Integer (0-3)
-		 * 
 		 */
 		// draw check -- note draws are only counted if every space
 		// has been filled with a token.
@@ -219,12 +184,20 @@ public class ConnectFour {
 			return 3; // return tie
 		}
 		// Vertical check
-		ending = vert_Check(board,winCount);
+		ending = vert_Check(board,winCount, 3); // Yellow check
+		if (ending > 0) { // return ending if not continue
+			return ending;
+		}
+		ending = vert_Check(board,winCount, 4); // Red check
 		if (ending > 0) { // return ending if not continue
 			return ending;
 		}
 		// Horizontal check
-		ending = horizontal_Check(board,winCount);
+		ending = horizontal_Check(board,winCount, 3);
+		if (ending > 0) { // return ending if not continue
+			return ending;
+		}
+		ending = horizontal_Check(board,winCount, 4);
 		if (ending > 0) { // return ending if not continue
 			return ending;
 		}
@@ -234,21 +207,23 @@ public class ConnectFour {
 		int[] topRight = {1,1};
 		int[] downLeft = {-1,-1};
 		int[] downRight = {-1,1};
-		ending = diagonal_Check(board,winCount,topLeft);
-		if (ending > 0) { // return ending if top-left diagonal wins
-			return ending;
-		}
-		ending = diagonal_Check(board,winCount,topRight);
-		if (ending > 0) { // return ending if top-right diagonal wins
-			return ending;
-		}
-		ending = diagonal_Check(board,winCount,downLeft);
-		if (ending > 0) { // return ending if down-left diagonal wins
-			return ending;
-		}
-		ending = diagonal_Check(board,winCount,downRight);
-		if (ending > 0) { // return ending if down-right diagonal wins
-			return ending;
+		for (int team = 3; team <= 4; team++) { // checks both teams
+			ending = diagonal_Check(board,winCount,topLeft, team);
+			if (ending > 0) { // return ending if top-left diagonal wins
+				return ending;
+			}
+			ending = diagonal_Check(board,winCount,topRight, team);
+			if (ending > 0) { // return ending if top-right diagonal wins
+				return ending;
+			}
+			ending = diagonal_Check(board,winCount,downLeft, team);
+			if (ending > 0) { // return ending if down-left diagonal wins
+				return ending;
+			}
+			ending = diagonal_Check(board,winCount,downRight, team);
+			if (ending > 0) { // return ending if down-right diagonal wins
+				return ending;
+			}
 		}
 			
 		return ending; // return whatever ending is at this point (should be 0)
@@ -281,7 +256,6 @@ public class ConnectFour {
 		/*	This function is the one that places a token on the board.
 		 * 
 		 * 	Return: Array
-		 * 
 		 */
 		for (int layer = 0; layer < 8; layer ++) { // iterates thru and places token
 			if (board[layer + 1][column] > 1) {
@@ -305,11 +279,11 @@ public class ConnectFour {
 		 * 	determines what the player wishes to do.
 		 * 
 		 * 	Return: N/A
-		 * 
 		 */
 		int winner = 0; // initializes variables
 		int i = 0;
 		int token_placement = 0;
+		String cont;
 		String error = "BAD"; // used to prevent infinite loop
 		Scanner input = new Scanner(System.in);
 		while (true) {
@@ -361,19 +335,36 @@ public class ConnectFour {
 			}
 			winner = win_Check(board,winCount); // checks for winner
 			if (winner == 1) {
-				System.out.println("Yellow Won!");
 				display_board(board);
+				System.out.println("Yellow Won!");
 				break;
 			}
 			else if (winner == 2) {
-				System.out.println("Red Won!");
 				display_board(board);
+				System.out.println("Red Won!");
 				break;
 			}
 			else if (winner == 3) {
-				System.out.println("Tie!");
 				display_board(board);
+				System.out.println("Tie!");
 				break;
+			}
+		}
+		System.out.println("Play again? (Y/N)");
+		Scanner input2 = new Scanner(System.in);
+		while (true) // checks that user doesn't enter in crazy inputs
+		{
+			cont = input2.next();
+			if (cont.equalsIgnoreCase("Y")) {
+				main(null);
+			}
+			else if (cont.equalsIgnoreCase("N")) {
+				System.out.println("Thank you for playing!");
+				input2.close();
+				System.exit(0);
+			}
+			else {
+				System.out.println("Invalid entry!");
 			}
 		}
 	}
@@ -383,7 +374,6 @@ public class ConnectFour {
 		 * 	format.
 		 * 
 		 * 	Return: N/A
-		 * 
 		 */
 		// connect 4 board is 15 across, 7 tall
 		// 0 == '', 1 == |, 2 == -, 3 == Y, 4 == R
